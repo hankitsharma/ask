@@ -1,3 +1,25 @@
+// FORMSPREE PAGE OPEN ALERT
+window.addEventListener('DOMContentLoaded', () => {
+    // 👇 REPLACE THIS WITH YOUR ACTUAL FORMSPREE ID
+    const formspreeId = 'YOUR_FORM_ID'; 
+
+    if (formspreeId === 'YOUR_FORM_ID') return; // Prevents errors if not set up
+
+    fetch(`https://formspree.io/f/${formspreeId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            subject: '💌 She/He opened the page!',
+            message: 'Your unblock request link was just opened.',
+            timestamp: new Date().toLocaleString()
+        })
+    }).catch(err => console.error(err));
+});
+
+
 const gifStages = [
     "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",    // 0 normal
     "https://media1.tenor.com/m/uDugCXK4vI4AAAAd/chiikawa-hachiware.gif",  // 1 confused
