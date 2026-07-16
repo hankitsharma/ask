@@ -1,9 +1,9 @@
 // FORMSPREE PAGE OPEN ALERT
 window.addEventListener('DOMContentLoaded', () => {
     // 👇 REPLACE THIS WITH YOUR ACTUAL FORMSPREE ID
-    const formspreeId = 'YOUR_FORM_ID'; 
+    const formspreeId = 'https://formspree.io/f/mvzezoqn'; 
 
-    if (formspreeId === 'YOUR_FORM_ID') return; // Prevents errors if not set up
+    if (formspreeId === 'https://formspree.io/f/mvzezoqn') return; // Prevents errors if not set up
 
     fetch(`https://formspree.io/f/${formspreeId}`, {
         method: 'POST',
