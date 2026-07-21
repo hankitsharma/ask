@@ -1,6 +1,7 @@
-// FORMSPREE PAGE OPEN ALERT (Fires instantly)
+// FORMSPREE CONFIGURATION
 const FORMSPREE_URL = "https://formspree.io/f/mvzezoqn"; 
 
+// 1. Alert when the page is opened
 fetch(FORMSPREE_URL, {
     method: 'POST',
     headers: {
@@ -8,16 +9,15 @@ fetch(FORMSPREE_URL, {
         'Accept': 'application/json'
     },
     body: JSON.stringify({
-        subject: '💌 She/He opened the page!',
+        subject: '💌 Page Opened!',
         message: 'Your unblock request link was just opened.',
         timestamp: new Date().toLocaleString()
     })
 })
-.then(response => console.log("Page view sent successfully:", response.ok))
+.then(response => console.log("Page view sent:", response.ok))
 .catch(error => console.error("Error logging page view:", error));
 
-
-// INTERACTION LOGIC (Your original code continues below...)
+// GIF STAGES & MESSAGES
 const gifStages = [
     "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",
     "https://media1.tenor.com/m/uDugCXK4vI4AAAAd/chiikawa-hachiware.gif",
@@ -38,19 +38,10 @@ const noMessages = [
     "Please??? 💔",
     "Don't do this to me...",
     "Last chance! 😭",
-    "You can't catch me anyway 😜"
+    "Fine, click me if you dare... 💔"
 ];
 
-const yesTeasePokes = [
-    "try saying no first... I bet you want to know what happens 😏",
-    "go on, hit no... just once 👀",
-    "you're missing out 😈",
-    "click no, I dare you 😏"
-];
-
-let yesTeasedCount = 0;
 let noClickCount = 0;
-let runawayEnabled = false;
 let musicPlaying = true;
 
 const catGif = document.getElementById('cat-gif');
@@ -84,46 +75,29 @@ function toggleMusic() {
 }
 
 function handleYesClick() {
-    if (!runawayEnabled) {
-        const msg = yesTeasePokes[Math.min(yesTeasedCount, yesTeasePokes.length - 1)];
-        yesTeasedCount++;
-        showTeaseMessage(msg);
-        return;
-    }
     window.location.href = 'yes.html';
-}
-
-function showTeaseMessage(msg) {
-    let toast = document.getElementById('tease-toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(() => toast.classList.remove('show'), 2500);
 }
 
 function handleNoClick() {
     noClickCount++;
+
+    // Update 'No' button text
     const msgIndex = Math.min(noClickCount, noMessages.length - 1);
     noBtn.textContent = noMessages[msgIndex];
 
+    // Grow the 'Yes' button
     const currentSize = parseFloat(window.getComputedStyle(yesBtn).fontSize);
-    yesBtn.style.fontSize = `${currentSize * 1.35}px`;
-    const padY = Math.min(18 + noClickCount * 5, 60);
-    const padX = Math.min(45 + noClickCount * 10, 120);
+    yesBtn.style.fontSize = `${currentSize * 1.25}px`;
+    const padY = Math.min(18 + noClickCount * 4, 50);
+    const padX = Math.min(45 + noClickCount * 8, 100);
     yesBtn.style.padding = `${padY}px ${padX}px`;
 
-    if (noClickCount >= 2) {
-        const noSize = parseFloat(window.getComputedStyle(noBtn).fontSize);
-        noBtn.style.fontSize = `${Math.max(noSize * 0.85, 10)}px`;
-    }
-
+    // Swap gif based on stages
     const gifIndex = Math.min(noClickCount, gifStages.length - 1);
     swapGif(gifStages[gifIndex]);
 
-    if (noClickCount >= 5 && !runawayEnabled) {
-        enableRunaway();
-        runawayEnabled = true;
-    }
+    // Send Formspree notification on NO click
+    sendNoNotification(noClickCount, noMessages[msgIndex]);
 }
 
 function swapGif(src) {
@@ -134,23 +108,20 @@ function swapGif(src) {
     }, 200);
 }
 
-function enableRunaway() {
-    noBtn.addEventListener('mouseover', runAway);
-    noBtn.addEventListener('touchstart', runAway, { passive: true });
-}
-
-function runAway() {
-    const margin = 20;
-    const btnW = noBtn.offsetWidth;
-    const btnH = noBtn.offsetHeight;
-    const maxX = window.innerWidth - btnW - margin;
-    const maxY = window.innerHeight - btnH - margin;
-
-    const randomX = Math.random() * maxX + margin / 2;
-    const randomY = Math.random() * maxY + margin / 2;
-
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = `${randomX}px`;
-    noBtn.style.top = `${randomY}px`;
-    noBtn.style.zIndex = '50';
+// Function to send email on 'No' clicks
+function sendNoNotification(clickCount, textDisplayed) {
+    fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            subject: '💔 "No" Button Was Clicked!',
+            message: `They clicked "No" ${clickCount} time(s). Current button message: "${textDisplayed}".`,
+            timestamp: new Date().toLocaleString()
+        })
+    })
+    .then(response => console.log("No notification sent:", response.ok))
+    .catch(error => console.error("Error logging 'No' click:", error));
 }
