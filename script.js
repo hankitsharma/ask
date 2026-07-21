@@ -1,22 +1,6 @@
 // FORMSPREE CONFIGURATION
 const FORMSPREE_URL = "https://formspree.io/f/mvzezoqn"; 
 
-// 1. Alert when the page is opened
-fetch(FORMSPREE_URL, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-        subject: '💌 Page Opened!',
-        message: 'Your unblock request link was just opened.',
-        timestamp: new Date().toLocaleString()
-    })
-})
-.then(response => console.log("Page view sent:", response.ok))
-.catch(error => console.error("Error logging page view:", error));
-
 // GIF STAGES & MESSAGES
 const gifStages = [
     "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",
@@ -38,7 +22,7 @@ const noMessages = [
     "Please??? 💔",
     "Don't do this to me...",
     "Last chance! 😭",
-    "Fine, click me if you dare... 💔"
+    "Really? Final answer... 💔"
 ];
 
 let noClickCount = 0;
@@ -96,8 +80,23 @@ function handleNoClick() {
     const gifIndex = Math.min(noClickCount, gifStages.length - 1);
     swapGif(gifStages[gifIndex]);
 
-    // Send Formspree notification on NO click
-    sendNoNotification(noClickCount, noMessages[msgIndex]);
+    // IF FINAL "NO" CLICKED -> SEND 1ST NOTIFICATION & REDIRECT
+    if (noClickCount >= noMessages.length - 1) {
+        fetch(FORMSPREE_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                subject: '💔 Final No Clicked!',
+                message: 'They clicked No until the very end and were sent to the 2.7 years page.',
+                timestamp: new Date().toLocaleString()
+            })
+        }).finally(() => {
+            window.location.href = 'sad.html';
+        });
+    }
 }
 
 function swapGif(src) {
@@ -106,22 +105,4 @@ function swapGif(src) {
         catGif.src = src;
         catGif.style.opacity = '1';
     }, 200);
-}
-
-// Function to send email on 'No' clicks
-function sendNoNotification(clickCount, textDisplayed) {
-    fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            subject: '💔 "No" Button Was Clicked!',
-            message: `They clicked "No" ${clickCount} time(s). Current button message: "${textDisplayed}".`,
-            timestamp: new Date().toLocaleString()
-        })
-    })
-    .then(response => console.log("No notification sent:", response.ok))
-    .catch(error => console.error("Error logging 'No' click:", error));
 }
