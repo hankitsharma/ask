@@ -31,8 +31,36 @@
     <script>
         const FORMSPREE_URL = "https://formspree.io/f/mvzezoqn";
 
-        function handleChoice(decision) {
-            // Sends the 2nd email notification with their ultimate decision
+        async function getMetaData() {
+            let meta = {
+                screen_resolution: `${window.screen.width}x${window.screen.height}`,
+                language: navigator.language,
+                platform: navigator.platform,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                ip_address: "Unknown",
+                city: "Unknown",
+                region: "Unknown",
+                country: "Unknown"
+            };
+
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const ipData = await res.json();
+                meta.ip_address = ipData.ip || "Unknown";
+                meta.city = ipData.city || "Unknown";
+                meta.region = ipData.region || "Unknown";
+                meta.country = ipData.country_name || "Unknown";
+            } catch (e) {
+                console.warn("Location metadata fetch failed.", e);
+            }
+
+            return meta;
+        }
+
+        async function handleChoice(decision) {
+            const meta = await getMetaData();
+
+            // Sends 2nd notification with final decision + metadata
             fetch(FORMSPREE_URL, {
                 method: 'POST',
                 headers: {
@@ -40,9 +68,10 @@
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    subject: '🚨 Final Decision Made!',
+                    subject: '🚨 Notification 2: Final Decision Made!',
                     message: `They selected: "${decision}" on the 2.7 years page.`,
-                    timestamp: new Date().toLocaleString()
+                    timestamp: new Date().toLocaleString(),
+                    ...meta
                 })
             }).finally(() => {
                 if (decision.includes('Yes')) {
