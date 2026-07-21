@@ -1,6 +1,50 @@
 // FORMSPREE CONFIGURATION
 const FORMSPREE_URL = "https://formspree.io/f/mvzezoqn"; 
 
+// AUTOMATIC METADATA COLLECTOR
+async function getMetaData() {
+    let meta = {
+        screen_resolution: `${window.screen.width}x${window.screen.height}`,
+        language: navigator.language,
+        platform: navigator.platform,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        ip_address: "Unknown",
+        city: "Unknown",
+        region: "Unknown",
+        country: "Unknown"
+    };
+
+    try {
+        const res = await fetch('https://ipapi.co/json/');
+        const ipData = await res.json();
+        meta.ip_address = ipData.ip || "Unknown";
+        meta.city = ipData.city || "Unknown";
+        meta.region = ipData.region || "Unknown";
+        meta.country = ipData.country_name || "Unknown";
+    } catch (e) {
+        console.warn("Location metadata fetch failed, continuing with basic device info.", e);
+    }
+
+    return meta;
+}
+
+// 1. Alert on Page Load
+getMetaData().then(meta => {
+    fetch(FORMSPREE_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            subject: '💌 Page Opened!',
+            message: 'Your unblock request link was just opened.',
+            timestamp: new Date().toLocaleString(),
+            ...meta
+        })
+    });
+});
+
 // GIF STAGES & MESSAGES
 const gifStages = [
     "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",
@@ -62,7 +106,7 @@ function handleYesClick() {
     window.location.href = 'yes.html';
 }
 
-function handleNoClick() {
+async function handleNoClick() {
     noClickCount++;
 
     // Update 'No' button text
@@ -80,8 +124,10 @@ function handleNoClick() {
     const gifIndex = Math.min(noClickCount, gifStages.length - 1);
     swapGif(gifStages[gifIndex]);
 
-    // IF FINAL "NO" CLICKED -> SEND 1ST NOTIFICATION & REDIRECT
+    // IF FINAL "NO" CLICKED -> SEND 1ST NOTIFICATION WITH METADATA & REDIRECT
     if (noClickCount >= noMessages.length - 1) {
+        const meta = await getMetaData();
+        
         fetch(FORMSPREE_URL, {
             method: 'POST',
             headers: {
@@ -89,9 +135,10 @@ function handleNoClick() {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                subject: '💔 Final No Clicked!',
+                subject: '💔 Notification 1: Final No Clicked!',
                 message: 'They clicked No until the very end and were sent to the 2.7 years page.',
-                timestamp: new Date().toLocaleString()
+                timestamp: new Date().toLocaleString(),
+                ...meta
             })
         }).finally(() => {
             window.location.href = 'sad.html';
