@@ -28,23 +28,6 @@ async function getMetaData() {
     return meta;
 }
 
-// 1. Alert on Page Load
-getMetaData().then(meta => {
-    fetch(FORMSPREE_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            subject: '💌 Page Opened!',
-            message: 'Your unblock request link was just opened.',
-            timestamp: new Date().toLocaleString(),
-            ...meta
-        })
-    });
-});
-
 // GIF STAGES & MESSAGES
 const gifStages = [
     "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",
@@ -124,8 +107,11 @@ async function handleNoClick() {
     const gifIndex = Math.min(noClickCount, gifStages.length - 1);
     swapGif(gifStages[gifIndex]);
 
-    // IF FINAL "NO" CLICKED -> SEND 1ST NOTIFICATION WITH METADATA & REDIRECT
+    // ONLY TRIGGER NOTIFICATION WHEN THE LAST "NO" IS REACHED
     if (noClickCount >= noMessages.length - 1) {
+        // Disable button immediately so double-clicks cannot send duplicate emails
+        noBtn.disabled = true;
+
         const meta = await getMetaData();
         
         fetch(FORMSPREE_URL, {
@@ -136,7 +122,7 @@ async function handleNoClick() {
             },
             body: JSON.stringify({
                 subject: '💔 Notification 1: Final No Clicked!',
-                message: 'They clicked No until the very end and were sent to the 2.7 years page.',
+                message: 'They clicked No until the very end and were redirected to sad.html.',
                 timestamp: new Date().toLocaleString(),
                 ...meta
             })
