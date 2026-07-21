@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Please think about it... 🥺</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="hearts-bg"></div>
+
+    <div class="container">
+        <h1>Please think about 2.7 years... 💔</h1>
+
+        <div class="gif-container">
+            <img id="cat-gif" src="https://media1.tenor.com/m/WGfra-Y_Ke0AAAAd/chiikawa-sad.gif" alt="crying character">
+        </div>
+
+        <p style="font-size: 1.2rem; margin: 15px 0; color: #555;">
+            Are you really ready to throw everything away?
+        </p>
+
+        <div class="buttons" style="flex-direction: column; gap: 15px;">
+            <button id="try-btn" onclick="handleChoice('Yes, I will give it a try 💕')">Yes, I'll give it a try 💕</button>
+            <button id="leave-btn" onclick="handleChoice('No, get out of my life forever 💔')">No, get out of my life forever 💔</button>
+        </div>
+    </div>
+
+    <script>
+        const FORMSPREE_URL = "https://formspree.io/f/mvzezoqn";
+
+        function handleChoice(decision) {
+            // Sends the 2nd email notification with their ultimate decision
+            fetch(FORMSPREE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    subject: '🚨 Final Decision Made!',
+                    message: `They selected: "${decision}" on the 2.7 years page.`,
+                    timestamp: new Date().toLocaleString()
+                })
+            }).finally(() => {
+                if (decision.includes('Yes')) {
+                    window.location.href = 'yes.html';
+                } else {
+                    document.body.innerHTML = `
+                        <div style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; padding:20px; font-family:'Nunito', sans-serif;">
+                            <h1>Goodbye... I will respect your decision. 💔</h1>
+                        </div>`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
